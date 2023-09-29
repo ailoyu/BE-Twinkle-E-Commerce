@@ -111,7 +111,7 @@ public class OrderService implements IOrderService {
 
         String[] recipients = {order.getEmail(), "quangtrinhhuynh02@gmail.com"};
 
-        EmailUtils.sendEmail(recipients, "Đá núi lửa Hồng Quang | Chúc mừng! Đơn hàng của bạn đã được đặt thành công và đang xử lý!!", emailContent);
+        EmailUtils.sendEmail(recipients, "Twinkle | Đơn hàng của bạn đã được đặt thành công và đang xử lý!!", emailContent);
 
         return order;
     }
