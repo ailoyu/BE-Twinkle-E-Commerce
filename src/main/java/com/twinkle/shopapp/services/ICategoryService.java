@@ -1,0 +1,15 @@
+package com.twinkle.shopapp.services;
+
+import com.twinkle.shopapp.dtos.CategoryDTO;
+import com.twinkle.shopapp.models.Category;
+
+import java.util.List;
+
+public interface ICategoryService {
+
+    Category createCategory(CategoryDTO category);
+    Category getCategoryById(long id);
+    List<Category> getAllCategories();
+    Category updateCategory(long categoryId, CategoryDTO category);
+    void deleteCategory(long id);
+}

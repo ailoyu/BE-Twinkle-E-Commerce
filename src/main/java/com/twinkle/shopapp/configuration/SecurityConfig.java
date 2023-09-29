@@ -1,0 +1,59 @@
+package com.twinkle.shopapp.configuration;
+
+import com.twinkle.shopapp.models.User;
+import com.twinkle.shopapp.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+
+    private final UserRepository userRepository;
+    // user's detail object
+    // (khi đăng nhập, lưu đối tượng user để sử dụng cho các phần khác)
+
+    @Bean
+    public UserDetailsService userDetailsService(){
+        // thông tin đại diện cho user (sdt)
+        return phoneNumber -> userRepository
+                .findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new UsernameNotFoundException("Ko tìm thấy sdt này"));
+
+    }
+
+    @Bean // Mã hóa mk HS256
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+        // Cần userDetail & passwordEncoder
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+
+
+}
