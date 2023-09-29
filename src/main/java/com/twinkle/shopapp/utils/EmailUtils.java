@@ -254,7 +254,7 @@ public class EmailUtils {
                 "      <td style=\"overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;\" align=\"left\">\n" +
                 "        \n" +
                 "  <div style=\"font-size: 42px; line-height: 140%; text-align: center; word-wrap: break-word;\">\n" +
-                "    <p style=\"line-height: 140%;\"><strong><span style=\"color: #ecf0f1; line-height: 58.8px;\">Đặt hàng thành công!</span></strong></p>\n" +
+                "    <p style=\"line-height: 140%;\"><strong><span style=\"color: #ecf0f1; line-height: 58.8px;\">Twinkle</span></strong></p>\n" +
                 "  </div>\n" +
                 "\n" +
                 "      </td>\n" +
@@ -791,7 +791,7 @@ public class EmailUtils {
                 "  <div style=\"font-size: 14px; line-height: 140%; text-align: left; word-wrap: break-word;\">\n" +
                 "    <p style=\"line-height: 140%;\">Đây là email tự động, vui lòng không trả lời email này.</p>\n" +
                 "<p style=\"line-height: 140%;\">Chân thành cảm ơn bạn,</p>\n" +
-                "<p style=\"line-height: 140%;\">Liên hệ: <a href=\"tel:0918 245 977\">0918 245 977</a></p>\n" +
+                "<p style=\"line-height: 140%;\">Twinkle Dev (Chan Quang)</p>\n" +
                 "  </div>\n" +
                 "\n" +
                 "      </td>\n" +
