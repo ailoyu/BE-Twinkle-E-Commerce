@@ -130,9 +130,9 @@ public class ProductService implements IProductService {
             if(productDTO.getImages().length > 0){
                 List<String> newImages = Arrays.stream(productDTO.getImages())
                         .map(image -> {
-                            return image.startsWith("http") ?
-                                    image.substring(image.lastIndexOf("/") + 1)
-                                    : imageUtils.storeFileWithBase64(image);
+                            return image.startsWith("data") ?
+                                    imageUtils.storeFileWithBase64(image)
+                                    : image;
                         })
                         .collect(Collectors.toList());
 
