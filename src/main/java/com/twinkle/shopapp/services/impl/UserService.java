@@ -129,6 +129,7 @@ public class UserService implements IUserService {
                 .phoneNumber(existingUser.getPhoneNumber())
                 .avatar(existingUser.getAvatar())
                 .dateOfBirth(existingUser.getDateOfBirth().toString())
+                .roleId(existingUser.getRole().getId())
                 .build();
     }
 
