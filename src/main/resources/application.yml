@@ -8,6 +8,13 @@ spring:
     username: w7yeb6bhb9sv8mr4
     password: spckwr2h13ehecsl
 
+#spring:
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/twinkle?reconnect=true&characterEncoding=UTF-8
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password:
+
   spring:
 
   jpa:
