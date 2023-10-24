@@ -199,4 +199,25 @@ public class ProductService implements IProductService {
         return productImageRepository.save(newProductImage);
 
     }
+
+    @Override
+    public List<ProductResponse> getAllBestSellers() {
+
+        List<ProductResponse> bestSellers = new ArrayList<>();
+        for (Product product : productRepository.getAllBestSellers()) {
+            bestSellers.add(ProductResponse.fromProduct(product));
+        }
+        return bestSellers;
+    }
+
+    @Override
+    public List<ProductResponse> getProductsByCategory(Long categoryId) {
+        List<ProductResponse> productByCategory = new ArrayList<>();
+        for (Product product : productRepository.getProductsByCategory(categoryId)) {
+            productByCategory.add(ProductResponse.fromProduct(product));
+        }
+        return productByCategory;
+    }
+
+
 }

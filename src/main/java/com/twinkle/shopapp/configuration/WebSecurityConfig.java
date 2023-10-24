@@ -51,7 +51,10 @@ public class WebSecurityConfig {
                             // chỉ định các role dc truy cập vào API
 
                             .requestMatchers(HttpMethod.GET,
-                                    String.format("%s/users/**", apiPrefix)).permitAll()
+                                    String.format("%s/users/find-by-phone/**", apiPrefix)).permitAll()
+
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/users/get-all-users-by-admin", apiPrefix)).hasAnyRole(Role.ADMIN)
 
                             .requestMatchers(HttpMethod.POST,
                                     String.format("%s/users/**", apiPrefix)).permitAll()

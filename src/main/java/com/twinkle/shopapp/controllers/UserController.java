@@ -59,7 +59,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{phoneNumber}")
+    @GetMapping("/find-by-phone/{phoneNumber}")
     public ResponseEntity<LoginResponse> getUserByPhoneNumber(
             @PathVariable(name = "phoneNumber") String phoneNumber
     ){
@@ -73,6 +73,11 @@ public class UserController {
                             .message(localizationUtils.getLocalizedMessage(MessageKeys.LOGIN_FAILED, e.getMessage()))
                             .build());
         }
+    }
+
+    @GetMapping("/get-all-users-by-admin")
+    public ResponseEntity<?> getAllUsersByAdmin(){
+        return ResponseEntity.ok(userService.getAllUsersByAdmin());
     }
 
     @PostMapping("/login")

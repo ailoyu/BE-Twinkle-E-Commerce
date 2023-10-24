@@ -180,16 +180,7 @@ public class ProductController {
                     .build());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) throws Exception{
-        try{
-            Product product = productService.getProductById(productId);
-            ProductResponse productResponse = ProductResponse.fromProduct(product);
-            return ResponseEntity.ok().body(productResponse);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+
 
     @GetMapping("/by-ids")
     public ResponseEntity<?> getProductByIds(@RequestParam("ids") String ids){
@@ -252,6 +243,29 @@ public class ProductController {
             }
         }
         return ResponseEntity.ok("Fake products created succesfully");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) throws Exception{
+        try{
+            Product product = productService.getProductById(productId);
+            ProductResponse productResponse = ProductResponse.fromProduct(product);
+            return ResponseEntity.ok().body(productResponse);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/best-sellers")
+    public ResponseEntity<?> getAllBestSellers(){
+        return ResponseEntity.ok(productService.getAllBestSellers());
+    }
+
+    @GetMapping("/products-from-category/{category_id}")
+    public ResponseEntity<?> getProductByCategory(
+            @PathVariable(name = "category_id") Long category_id
+    ){
+        return ResponseEntity.ok(productService.getProductsByCategory(category_id));
     }
 
 }

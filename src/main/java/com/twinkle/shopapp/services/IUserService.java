@@ -6,6 +6,7 @@ import com.twinkle.shopapp.models.User;
 import com.twinkle.shopapp.responses.LoginResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface IUserService {
 
@@ -18,4 +19,6 @@ public interface IUserService {
     LoginResponse updateUserByPhoneNumber(UserDTO userDTO) throws DataNotFoundException, IOException;
 
     User changePassword(String phoneNumber, String password, String newPassword) throws DataNotFoundException;
+
+    List<User> getAllUsersByAdmin();
 }
