@@ -33,5 +33,10 @@ public class ProductDTO {
     @JsonProperty("category_id") // tên trong DB
     private Long categoryId;
 
+    private int quantity;
+
+    @Min(value = 30, message = "Size phải lớn hơn 30")
+    @Max(value = 50, message = "Size phải lơn hơn 50")
+    private float size;
 
 }

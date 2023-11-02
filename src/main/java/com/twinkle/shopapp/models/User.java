@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "phone_number"))
 @Getter
 @Setter
 @AllArgsConstructor
@@ -27,7 +27,7 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "fullname", length = 100) // maximum chữ là 350 chữ
     private String fullName;
 
-    @Column(name = "phone_number", length = 10, nullable = false)
+    @Column(name = "phone_number", length = 10, nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(name = "address", length = 200)
@@ -54,6 +54,8 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "avatar")
     private String avatar;
+
+
 
 
     @Override

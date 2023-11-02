@@ -28,9 +28,6 @@ public class OrderDetailResponse {
     @JsonProperty("number_of_products")
     private int numberOfProducts;
 
-    @JsonProperty("total_money")
-    private Float totalMoney;
-
     private String color;
 
     // Chuyển từ product -> ProductResponse
@@ -40,9 +37,12 @@ public class OrderDetailResponse {
                 .id(orderDetail.getId())
                 .orderId(orderDetail.getOrder().getId())
                 .productId(orderDetail.getProduct().getId())
-                .price(orderDetail.getPrice())
+                .price(orderDetail
+                        .getProduct()
+                        .getProductPrices()
+                        .get(orderDetail.getProduct().getProductPrices().size() - 1)
+                        .getPrice())
                 .numberOfProducts(orderDetail.getNumberOfProducts())
-                .totalMoney(orderDetail.getTotalMoney())
                 .build();
     }
 

@@ -7,8 +7,10 @@ import com.twinkle.shopapp.exceptions.InvalidParamException;
 import com.twinkle.shopapp.models.Category;
 import com.twinkle.shopapp.models.Product;
 import com.twinkle.shopapp.models.ProductImage;
+import com.twinkle.shopapp.models.ProductPrice;
 import com.twinkle.shopapp.repositories.CategoryRepository;
 import com.twinkle.shopapp.repositories.ProductImageRepository;
+import com.twinkle.shopapp.repositories.ProductPriceRepository;
 import com.twinkle.shopapp.repositories.ProductRepository;
 import com.twinkle.shopapp.responses.ProductResponse;
 import com.twinkle.shopapp.services.IProductService;
@@ -22,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +36,8 @@ public class ProductService implements IProductService {
     private final CategoryRepository categoryRepository;
 
     private final ProductImageRepository productImageRepository;
+
+    private final ProductPriceRepository productPriceRepository;
 
     @Autowired
     private ImageUtils imageUtils;
@@ -52,7 +53,6 @@ public class ProductService implements IProductService {
         Product newProduct = Product
                 .builder()
                 .name(productDTO.getName())
-                .price(productDTO.getPrice())
                 .category(existingCategory)
                 .description(productDTO.getDescription())
                 .build();
@@ -88,10 +88,13 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId,
+    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size, String orderBy,
+                                                String selectedPriceRate,
                                                 PageRequest pageRequest) {
         // Lấy danh sách sản phẩm theo page hiện tại và limit
-        return productRepository.searchProducts(categoryId, keyword, pageRequest).map(product ->
+
+
+        return productRepository.searchProducts(categoryId, keyword, size, orderBy, selectedPriceRate, pageRequest).map(product ->
                 // parse từ product -> ProductResponse: kết quả muốn trả ra client
                 ProductResponse.fromProduct(product));
      }
@@ -109,8 +112,15 @@ public class ProductService implements IProductService {
             // Convert từ DTO -> Product (Dùng ModelMapper or Object Mapper)
             existingProduct.setName(productDTO.getName());
             existingProduct.setCategory(existingCategory);
-            existingProduct.setPrice(productDTO.getPrice());
+//            existingProduct.setPrice(productDTO.getPrice());
             existingProduct.setDescription(productDTO.getDescription());
+
+            // cập nhật lại product Price
+            ProductPrice productPrice = new ProductPrice();
+            productPrice.setPrice(productDTO.getPrice());
+            productPrice.setAppliedDate(new Date());
+            productPrice.setProduct(existingProduct);
+            productPriceRepository.save(productPrice);
 
 //            List<String> newImages = new ArrayList<>();
 //             if(productDTO.getImages().length > 0){
@@ -173,6 +183,11 @@ public class ProductService implements IProductService {
     @Override
     public boolean existsByName(String name) {
         return productRepository.existsByName(name);
+    }
+
+    @Override
+    public List<Float> getAllAvailableSizes() {
+        return productRepository.getAllAvailableSizes();
     }
 
     @Override

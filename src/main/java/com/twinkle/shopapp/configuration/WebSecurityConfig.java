@@ -114,6 +114,42 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.DELETE,
                                     String.format("%s/order_details/**", apiPrefix)).hasRole(Role.ADMIN)
 
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/providers/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/providers/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/providers/**", apiPrefix)).permitAll()
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/providers/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.POST,
+                                    String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.PUT,
+                                    String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
+                            .requestMatchers(HttpMethod.DELETE,
+                                    String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
+
                             .anyRequest().authenticated();
                 }).csrf(AbstractHttpConfigurer::disable);
 

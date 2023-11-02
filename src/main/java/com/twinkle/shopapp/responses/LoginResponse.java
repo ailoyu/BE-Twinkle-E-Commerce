@@ -40,4 +40,10 @@ public class LoginResponse {
 
     @JsonProperty("date_of_birth")
     private String dateOfBirth;
+
+    @JsonProperty("employee_id")
+    private long employeeId;
+
+
+
 }

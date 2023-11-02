@@ -4,6 +4,8 @@ import com.twinkle.shopapp.dtos.UserDTO;
 import com.twinkle.shopapp.exceptions.DataNotFoundException;
 import com.twinkle.shopapp.models.User;
 import com.twinkle.shopapp.responses.LoginResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,5 +22,7 @@ public interface IUserService {
 
     User changePassword(String phoneNumber, String password, String newPassword) throws DataNotFoundException;
 
-    List<User> getAllUsersByAdmin();
+    Page<User> getAllUsersByAdmin(String keyword, String phoneNumber, Long roleId, PageRequest pageRequest);
+
+    void deleteUsers(Long[] ids);
 }

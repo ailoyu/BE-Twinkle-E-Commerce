@@ -1,6 +1,8 @@
 package com.twinkle.shopapp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +26,6 @@ public class Product extends BaseEntity{
     @Column(name = "name", nullable = false, length = 350) // maximum chữ là 350 chữ
     private String name;
 
-    private Float price;
-
     @Column(name = "thumbnail", length = 300) // maximum chữ là 350 chữ
     private String thumbnail;
 
@@ -44,5 +44,13 @@ public class Product extends BaseEntity{
     @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<DetailInputOrder> detailInputOrders = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductPrice> productPrices = new ArrayList<>();
 
 }

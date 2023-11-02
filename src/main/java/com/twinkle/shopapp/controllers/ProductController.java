@@ -3,8 +3,10 @@ package com.twinkle.shopapp.controllers;
 import com.github.javafaker.Faker;
 import com.twinkle.shopapp.component.LocalizationUtils;
 import com.twinkle.shopapp.dtos.CategoryDTO;
+import com.twinkle.shopapp.dtos.OrderDTO;
 import com.twinkle.shopapp.dtos.ProductDTO;
 import com.twinkle.shopapp.dtos.ProductImageDTO;
+import com.twinkle.shopapp.models.Order;
 import com.twinkle.shopapp.models.Product;
 import com.twinkle.shopapp.models.ProductImage;
 import com.twinkle.shopapp.responses.CategoryResponse;
@@ -15,6 +17,7 @@ import com.twinkle.shopapp.utils.ImageUtils;
 import com.twinkle.shopapp.utils.MessageKeys;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -48,6 +51,7 @@ public class ProductController {
 
     private final LocalizationUtils localizationUtils;
 
+    private final ModelMapper modelMapper;
 
 
     @PostMapping("")
@@ -71,131 +75,6 @@ public class ProductController {
         }
 
     }
-    @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadImages(
-            @PathVariable("id") Long productId,
-            @ModelAttribute List<MultipartFile> files
-    ){
-        try {
-            // Lấy product ra để lưu productImages
-            Product existingProduct = productService.getProductById(productId);
-            List<ProductImage> productImages = new ArrayList<>();
-
-            // Nếu chèn 1 lần quá 5 ảnh thì ko chấp nhận
-            if(files.size() > 6)
-                return ResponseEntity.badRequest().body(localizationUtils
-                        .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_MAX_5));
-
-            // lưu nhìu ảnh trong product đó
-            files = (files == null) ? new ArrayList<MultipartFile>() : files;
-            for (MultipartFile file : files) {
-                if(file.getSize() == 0) {
-                    continue;
-                }
-                // Kiểm tra kích thước file
-                if (file.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
-//            throw new ResponseStatusException(
-//                    HttpStatus.PAYLOAD_TOO_LARGE, "Kích thước file ảnh quá lớn! Tối đa là 10MB");
-                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-                            .body(localizationUtils
-                                    .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
-                }
-
-
-                // Kiểm tra phải file ảnh ko?
-                String contentType = file.getContentType();
-                if (contentType == null || !contentType.startsWith("image/")) {
-                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                            .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_MUST_BE_IMAGE));
-                }
-
-                // Lưu hình ảnh xuống file
-                String filename = ImageUtils.storeFile(file);
-
-                //lưu vào bảng product_images
-                ProductImage productImage = productService.createProductImage(
-                        new ProductImageDTO().builder()
-                                .productId(productId)
-                                .imageUrl(filename)
-                                .build());
-
-                productImages.add(productImage);
-            }
-            return ResponseEntity.ok().body(productImages);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/images/{imageName}") // Xem lại ảnh sau khi upload
-    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
-        try {
-            java.nio.file.Path imagePath = Paths.get("uploads/"+imageName);
-            UrlResource resource = new UrlResource(imagePath.toUri());
-
-            if (resource.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-
-
-
-    @GetMapping("")
-    public ResponseEntity<ProductListResponse> getAllProducts(
-            @RequestParam(defaultValue = "") String keyword, // search
-            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId, // tìm theo thể loại
-            @RequestParam int page,
-            @RequestParam("limit") int limits
-    ) {
-        // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
-        // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
-        PageRequest pageRequest = PageRequest.of(
-                page - 1, limits,
-//                Sort.by("createdAt").descending());
-                    Sort.by("id").ascending() // sắp xếp theo id tăng dần
-        );
-
-        Page<ProductResponse> productPage = productService
-                .getAllProducts(keyword, categoryId, pageRequest);
-
-        // lấy tổng số trang
-        int totalPages = productPage.getTotalPages();
-
-        // danh sách các products ở tất cả các trang
-        List<ProductResponse> products = productPage.getContent();
-
-        return ResponseEntity.ok(new ProductListResponse().builder()
-                    .products(products)
-                    .totalPage(totalPages)
-                    .build());
-    }
-
-
-
-    @GetMapping("/by-ids")
-    public ResponseEntity<?> getProductByIds(@RequestParam("ids") String ids){
-        // Lấy ra chuỗi productIds có dạng: 1,4,5,6,7 (tách String thành từng con số)
-        try {
-            // Tách chuỗi id thành 1 List<Long>
-            List<Long> productIds = Arrays.stream(ids.split(","))
-                    .map(Long::parseLong)
-                    .collect(Collectors.toList());
-            List<Product> products = productService.findProductByIds(productIds);
-            return ResponseEntity.ok(products);
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 
 
     @PutMapping("/{id}")
@@ -209,6 +88,154 @@ public class ProductController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
+//    @PostMapping(value = "uploads/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> uploadImages(
+//            @PathVariable("id") Long productId,
+//            @ModelAttribute List<MultipartFile> files
+//    ){
+//        try {
+//            // Lấy product ra để lưu productImages
+//            Product existingProduct = productService.getProductById(productId);
+//            List<ProductImage> productImages = new ArrayList<>();
+//
+//            // Nếu chèn 1 lần quá 5 ảnh thì ko chấp nhận
+//            if(files.size() > 6)
+//                return ResponseEntity.badRequest().body(localizationUtils
+//                        .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_MAX_5));
+//
+//            // lưu nhìu ảnh trong product đó
+//            files = (files == null) ? new ArrayList<MultipartFile>() : files;
+//            for (MultipartFile file : files) {
+//                if(file.getSize() == 0) {
+//                    continue;
+//                }
+//                // Kiểm tra kích thước file
+//                if (file.getSize() > 10 * 1024 * 1024) { // Kích thước > 10MB
+////            throw new ResponseStatusException(
+////                    HttpStatus.PAYLOAD_TOO_LARGE, "Kích thước file ảnh quá lớn! Tối đa là 10MB");
+//                    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+//                            .body(localizationUtils
+//                                    .getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_LARGE));
+//                }
+//
+//
+//                // Kiểm tra phải file ảnh ko?
+//                String contentType = file.getContentType();
+//                if (contentType == null || !contentType.startsWith("image/")) {
+//                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+//                            .body(localizationUtils.getLocalizedMessage(MessageKeys.UPLOAD_IMAGES_FILE_MUST_BE_IMAGE));
+//                }
+//
+//                // Lưu hình ảnh xuống file
+//                String filename = ImageUtils.storeFile(file);
+//
+//                //lưu vào bảng product_images
+//                ProductImage productImage = productService.createProductImage(
+//                        new ProductImageDTO().builder()
+//                                .productId(productId)
+//                                .imageUrl(filename)
+//                                .build());
+//
+//                productImages.add(productImage);
+//            }
+//            return ResponseEntity.ok().body(productImages);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    @GetMapping("/images/{imageName}") // Xem lại ảnh sau khi upload
+//    public ResponseEntity<?> viewImage(@PathVariable String imageName) {
+//        try {
+//            java.nio.file.Path imagePath = Paths.get("uploads/"+imageName);
+//            UrlResource resource = new UrlResource(imagePath.toUri());
+//
+//            if (resource.exists()) {
+//                return ResponseEntity.ok()
+//                        .contentType(MediaType.IMAGE_JPEG)
+//                        .body(resource);
+//            } else {
+//                return ResponseEntity.ok()
+//                        .contentType(MediaType.IMAGE_JPEG)
+//                        .body(new UrlResource(Paths.get("uploads/notfound.jpg").toUri()));
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
+
+
+
+    @GetMapping("")
+    public ResponseEntity<ProductListResponse> getAllProducts(
+            @RequestParam(defaultValue = "") String keyword, // search
+            @RequestParam(defaultValue = "0", name = "category_id") Long categoryId, // tìm theo thể loại
+            @RequestParam(defaultValue = "0", name = "size") Float size,
+            @RequestParam(defaultValue = "", name = "order_by") String orderBy,
+            @RequestParam(defaultValue = "", name = "selected_price_rate") String selectedPriceRate,
+            @RequestParam int page,
+            @RequestParam("limit") int limits
+    ) {
+        // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
+        // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
+        PageRequest pageRequest = PageRequest.of(
+                page - 1, limits
+//                Sort.by("createdAt").descending());
+                // sắp xếp theo id tăng dần
+        );
+
+        Page<ProductResponse> productPage = productService
+                .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, pageRequest);
+
+        // lấy tổng số trang
+        int totalPages = productPage.getTotalPages();
+
+        // danh sách các products ở tất cả các trang
+        List<ProductResponse> products = productPage.getContent();
+
+        return ResponseEntity.ok(new ProductListResponse().builder()
+                    .products(products)
+                    .totalPage(totalPages)
+                    .build());
+    }
+
+    @GetMapping("/get-all-available-sizes")
+    public ResponseEntity<?> getAllAvailableSizes(){
+        return ResponseEntity.ok().body(ProductResponse.builder()
+                .sizes(productService.getAllAvailableSizes())
+                .build());
+    }
+
+
+
+    @GetMapping("/by-ids")
+    public ResponseEntity<?> getProductByIds(@RequestParam("ids") String ids){
+        // Lấy ra chuỗi productIds có dạng: 1,4,5,6,7 (tách String thành từng con số)
+        try {
+            // Tách chuỗi id thành 1 List<Long>
+            List<Long> productIds = Arrays.stream(ids.split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+            List<Product> products = productService.findProductByIds(productIds);
+
+            List<ProductResponse> productResponses = new ArrayList<>();
+
+            for(Product product : products){
+                ProductResponse productResponse = ProductResponse.fromProduct(product);
+                productResponses.add(productResponse);
+            }
+
+            return ResponseEntity.ok(productResponses);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+
 
     @DeleteMapping("/")
     public ResponseEntity<?> deleteProduct(@RequestBody Map<String, Long[]> request) {

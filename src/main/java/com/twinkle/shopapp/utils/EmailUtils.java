@@ -493,7 +493,7 @@ public class EmailUtils {
                             "      <td style=\"overflow-wrap:break-word;word-break:break-word;padding:5px 20px 5px 10px;font-family:arial,helvetica,sans-serif;\" align=\"left\">\n" +
                             "        \n" +
                             "  <div style=\"font-size: 14px; line-height: 140%; text-align: right; word-wrap: break-word;\">\n" +
-                            "    <p style=\"font-size: 14px; line-height: 140%;\"><span style=\"font-size: 16px; line-height: 22.4px;\">"+orderDetail.getProduct().getPrice()+" VND</span></p>\n" +
+                            "    <p style=\"font-size: 14px; line-height: 140%;\"><span style=\"font-size: 16px; line-height: 22.4px;\">"+orderDetail.getProduct().getProductPrices().get(orderDetail.getProduct().getProductPrices().size() - 1).getPrice()+" VND</span></p>\n" +
                             "  </div>\n" +
                             "\n" +
                             "      </td>\n" +

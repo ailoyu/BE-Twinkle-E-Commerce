@@ -6,8 +6,9 @@ import com.twinkle.shopapp.component.LocalizationUtils;
 import com.twinkle.shopapp.dtos.UserDTO;
 import com.twinkle.shopapp.exceptions.DataNotFoundException;
 import com.twinkle.shopapp.exceptions.PermissionDenyException;
-import com.twinkle.shopapp.models.Role;
-import com.twinkle.shopapp.models.User;
+import com.twinkle.shopapp.models.*;
+import com.twinkle.shopapp.repositories.CustomerRepository;
+import com.twinkle.shopapp.repositories.EmployeeRepository;
 import com.twinkle.shopapp.repositories.RoleRepository;
 import com.twinkle.shopapp.repositories.UserRepository;
 import com.twinkle.shopapp.responses.LoginResponse;
@@ -16,6 +17,8 @@ import com.twinkle.shopapp.utils.ImageUtils;
 import com.twinkle.shopapp.utils.MessageKeys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +39,10 @@ public class UserService implements IUserService {
 
     private final RoleRepository roleRepository;
 
+    private final CustomerRepository customerRepository;
+
+    private final EmployeeRepository employeeRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     private final JwtTokenUtils jwtTokenUtils;
@@ -43,6 +50,7 @@ public class UserService implements IUserService {
     private final AuthenticationManager authenticationManager;
 
     private final LocalizationUtils localizationUtils;
+
 
     @Override
     public User createUser(UserDTO userDTO) throws Exception {
@@ -56,9 +64,8 @@ public class UserService implements IUserService {
         Role role =roleRepository.findById(userDTO.getRoleId())
                 .orElseThrow(() -> new DataNotFoundException(
                         localizationUtils.getLocalizedMessage(MessageKeys.ROLE_DOES_NOT_EXISTS)));
-        if(role.getName().toUpperCase().equals(Role.ADMIN)) {
-            throw new PermissionDenyException("You cannot register an admin account");
-        }
+
+
 
         // Convert from DTO to model
         User newUser = User
@@ -85,7 +92,31 @@ public class UserService implements IUserService {
             newUser.setPassword(encodedPassword);
         }
 
-        return userRepository.save(newUser);
+        User save = userRepository.save(newUser);
+
+        if(role.getName().toUpperCase().equals(Role.ADMIN)) {
+            Employee employee = Employee.builder()
+                    .user(save)
+                    .fullName(newUser.getFullName())
+                    .phoneNumber(newUser.getPhoneNumber())
+                    .avatar(newUser.getAvatar())
+                    .address(newUser.getAddress())
+                    .dateOfBirth(newUser.getDateOfBirth())
+                    .build();
+            employeeRepository.save(employee);
+        } else if (role.getName().toUpperCase().equals(Role.USER)){
+            Customer customer = Customer.builder()
+                    .user(save)
+                    .fullName(newUser.getFullName())
+                    .phoneNumber(newUser.getPhoneNumber())
+                    .avatar(newUser.getAvatar())
+                    .address(newUser.getAddress())
+                    .dateOfBirth(newUser.getDateOfBirth())
+                    .build();
+            customerRepository.save(customer);
+        }
+
+        return save;
     }
 
     @Override
@@ -97,6 +128,10 @@ public class UserService implements IUserService {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.WRONG_PHONE_PASSWORD));
         }
         User existingUser = optionalUser.get();
+        if(!optionalUser.get().isActive()) {
+            throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
+        }
+
         // check password (nếu đăng nhập fb or google khỏi ktra password)
         if(existingUser.getFacebookAccountId() == 0 && existingUser.getGoogleAccountId() == 0) {
             // Kiểm tra mk chưa mã hóa vs mk đã mã hóa trong DB
@@ -110,9 +145,9 @@ public class UserService implements IUserService {
         if(optionalRole.isEmpty() || !roleId.equals(existingUser.getRole().getId())) {
             throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.ROLE_DOES_NOT_EXISTS));
         }
-        if(!optionalUser.get().isActive()) {
-            throw new DataNotFoundException(localizationUtils.getLocalizedMessage(MessageKeys.USER_IS_LOCKED));
-        }
+
+
+
 
 
         // authenticate with Java Spring Security
@@ -122,7 +157,7 @@ public class UserService implements IUserService {
         );
         authenticationManager.authenticate(authenticationToken);
 
-        return LoginResponse.builder()
+        LoginResponse login = LoginResponse.builder()
                 .id(existingUser.getId())
                 .fullName(existingUser.getFullName())
                 .token(jwtTokenUtils.generateToken(existingUser))  // trả JWT token
@@ -132,6 +167,14 @@ public class UserService implements IUserService {
                 .dateOfBirth(existingUser.getDateOfBirth().toString())
                 .roleId(existingUser.getRole().getId())
                 .build();
+
+
+        Employee employee = employeeRepository.findEmployeeByUserId(existingUser.getId());
+        if(employee != null){
+            login.setEmployeeId(employee.getId());
+        }
+
+        return login;
     }
 
     @Autowired
@@ -184,9 +227,23 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getAllUsersByAdmin() {
-        return userRepository.findAll();
+    public Page<User> getAllUsersByAdmin(String keyword, String phoneNumber, Long roleId, PageRequest pageRequest) {
+        return userRepository.searchUsers(roleId, keyword, phoneNumber, pageRequest);
     }
+
+    @Override
+    @Transactional
+    public void deleteUsers(Long[] ids) {
+        for(long id : ids){
+            Optional<User> optionalUser = userRepository.findById(id);
+            if(optionalUser.isPresent()){
+                optionalUser.get().setActive(false);
+            }
+        }
+    }
+
+
+
 
     @Override
     public LoginResponse getUserByPhoneNumber(String phoneNumber) throws DataNotFoundException {

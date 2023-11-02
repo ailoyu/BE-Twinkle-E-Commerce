@@ -3,19 +3,22 @@ package com.twinkle.shopapp.controllers;
 import com.twinkle.shopapp.dtos.UserDTO;
 import com.twinkle.shopapp.dtos.UserLoginDTO;
 import com.twinkle.shopapp.models.User;
-import com.twinkle.shopapp.responses.LoginResponse;
-import com.twinkle.shopapp.responses.RegisterResponse;
+import com.twinkle.shopapp.responses.*;
 import com.twinkle.shopapp.services.IUserService;
 import com.twinkle.shopapp.component.LocalizationUtils;
 import com.twinkle.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("${api.prefix}/users")
@@ -76,8 +79,34 @@ public class UserController {
     }
 
     @GetMapping("/get-all-users-by-admin")
-    public ResponseEntity<?> getAllUsersByAdmin(){
-        return ResponseEntity.ok(userService.getAllUsersByAdmin());
+    public ResponseEntity<UserListResponse> getAllUsers(
+            @RequestParam(defaultValue = "") String keyword, // search
+            @RequestParam(defaultValue = "", name = "phone_number") String phoneNumber,
+            @RequestParam(defaultValue = "1", name = "role_id") Long roleId, // tìm theo thể loại
+            @RequestParam int page,
+            @RequestParam("limit") int limits
+    ) {
+        // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
+        // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
+        PageRequest pageRequest = PageRequest.of(
+                page - 1, limits,
+//                Sort.by("createdAt").descending());
+                Sort.by("id").ascending() // sắp xếp theo id tăng dần
+        );
+
+        Page<User> productPage = userService
+                .getAllUsersByAdmin(keyword, phoneNumber, roleId, pageRequest);
+
+        // lấy tổng số trang
+        int totalPages = productPage.getTotalPages();
+
+        // danh sách các products ở tất cả các trang
+        List<User> users = productPage.getContent();
+
+        return ResponseEntity.ok(new UserListResponse().builder()
+                .users(users)
+                .totalPage(totalPages)
+                .build());
     }
 
     @PostMapping("/login")
@@ -135,6 +164,19 @@ public class UserController {
                     RegisterResponse.builder()
                             .message(e.getMessage())
                             .build());
+        }
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<?> deleteUsers(@RequestBody Map<String, Long[]> request) {
+        try{
+            Long[] ids = request.get("ids");
+            userService.deleteUsers(ids);
+            return ResponseEntity.ok().body(CategoryResponse.builder()
+                    .message("Xóa thành công")
+                    .build());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

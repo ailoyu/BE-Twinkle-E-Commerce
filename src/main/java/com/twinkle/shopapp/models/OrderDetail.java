@@ -26,10 +26,11 @@ public class OrderDetail {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private Float price;
-
     @Column(name = "number_of_products")
     private int numberOfProducts;
+
+    @Column(name = "product_price")
+    private Float productPrice;
 
     @Column(name = "total_money")
     private Float totalMoney;
