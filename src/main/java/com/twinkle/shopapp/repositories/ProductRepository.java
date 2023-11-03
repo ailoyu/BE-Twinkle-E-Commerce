@@ -29,7 +29,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND " +
             "(:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword%) " +
             "AND " +
-            "(:size IS NULL OR :size = 0 OR d.size = :size) " +
+            "(:size IS NULL OR :size = 0.0 OR d.size = :size) " +
             "AND " +
             "(:selectedPriceRate IS NULL OR :selectedPriceRate = '' OR" +
             "(:selectedPriceRate = '< 50' AND d.price < 50) OR " +
@@ -58,8 +58,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Float> getAllAvailableSizes();
 
 
-    @Query(value = "Select p from Product p where p.id in :productIds AND p.is_active = 1", nativeQuery = true) // gửi ds productIds lấy ra ds sản phẩm
-    List<Product> findProductById(@Param("productIds") List<Long> productIds);
+    @Query(value = "Select * from products p where p.id in :productIds AND p.is_active = 1", nativeQuery = true) // gửi ds productIds lấy ra ds sản phẩm
+    List<Product> findActiveProductsByIdIn(@Param("productIds") List<Long> productIds);
 
     @Query(value = "SELECT DISTINCT p.* " +
             "FROM (SELECT p.* FROM order_details od " +

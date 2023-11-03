@@ -84,7 +84,7 @@ public class ProductService implements IProductService {
     }
 
     public List<Product> findProductByIds(List<Long> productIds){
-        return productRepository.findProductById(productIds);
+        return productRepository.findActiveProductsByIdIn(productIds);
     }
 
     @Override
