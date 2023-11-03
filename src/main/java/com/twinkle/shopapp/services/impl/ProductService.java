@@ -79,7 +79,7 @@ public class ProductService implements IProductService {
 
     @Override
     public Product getProductById(long id) throws Exception {
-        return productRepository.findById(id)
+        return productRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy id " + id));
     }
 
@@ -174,8 +174,8 @@ public class ProductService implements IProductService {
         for(long id : ids){
             Optional<Product> optionalProduct = productRepository.findById(id);
             if(optionalProduct.isPresent()){
-                productRepository.delete(optionalProduct.get()); // nếu có product trong DB ms xóa
-
+                optionalProduct.get().setActive(false);
+                productRepository.save(optionalProduct.get());
             }
         }
     }

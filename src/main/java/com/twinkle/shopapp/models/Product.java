@@ -32,6 +32,9 @@ public class Product extends BaseEntity{
     @Column(name = "description", length = 300)
     private String description;
 
+    @Column(name = "is_active")
+    private boolean active;
+
     // 1 thể loại có nhiều products
     @ManyToOne
     @JoinColumn(name = "category_id")

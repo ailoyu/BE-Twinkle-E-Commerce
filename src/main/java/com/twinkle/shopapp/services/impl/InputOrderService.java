@@ -64,6 +64,7 @@ public class InputOrderService implements IInputOrderService {
                 .name(inputOrderDTO.getName())
                 .category(categoryRepository.findById(inputOrderDTO.getCategoryId())
                         .orElseThrow(() -> new DataNotFoundException("Category not found")))
+                .active(true)
                 .build();
         // Save the Product
         Product savedProduct = productRepository.save(newProduct);
@@ -137,6 +138,7 @@ public class InputOrderService implements IInputOrderService {
 
         product.setDescription(inputOrderDTO.getDescription());
         product.setName(inputOrderDTO.getName());
+        product.setActive(true);
         product.setCategory(categoryRepository.findById(inputOrderDTO.getCategoryId())
                 .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy category")));
 
