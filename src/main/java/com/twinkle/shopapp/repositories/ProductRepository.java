@@ -31,7 +31,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND " +
             "(:size IS NULL OR :size = 0 OR d.size = :size) " +
             "AND " +
-            "(:selectedPriceRate IS NULL OR :selectedPriceRate = '' OR" +
+            "(:selectedPriceRate IS NULL OR :selectedPriceRate = '' OR " +
             "(:selectedPriceRate = '< 50' AND d.price < 50) OR " +
             "(:selectedPriceRate = '>= 50 and <= 100' AND d.price >= 50 AND d.price <= 100) OR " +
             "(:selectedPriceRate = '> 100 and <= 200' AND d.price > 100 AND d.price <= 200) OR " +
@@ -43,8 +43,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> searchProducts(@Param("categoryId") Long categoryId,
                                  @Param("keyword") String keyword,
                                  @Param("size") Float size,
-                                 @Param("orderBy") String orderBy,
                                  @Param("selectedPriceRate") String selectedPriceRate,
+                                 @Param("orderBy") String orderBy,
                                  Pageable pageable);
 
 //    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
