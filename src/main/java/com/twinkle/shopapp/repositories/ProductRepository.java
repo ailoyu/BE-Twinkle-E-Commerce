@@ -22,7 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     // Đây là câu lệnh HQL
-    @Query(value = "SELECT DISTINCT p.* FROM products p " +
+    @Query(value = "SELECT DISTINCT p.id, p.name, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at FROM products p " +
             "INNER JOIN detail_input_order d ON p.id = d.product_id " +
             "WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category_id = :categoryId) " +
@@ -45,7 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                  @Param("size") Float size,
                                  @Param("orderBy") String orderBy,
                                  @Param("selectedPriceRate") String selectedPriceRate,
-                                 Pageable pageable);
+                                 PageRequest pageRequest);
 
 //    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
 //    Optional<Product> getDetailProduct(@Param("productId") Long productId);
