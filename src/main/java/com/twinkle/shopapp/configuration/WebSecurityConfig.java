@@ -150,6 +150,9 @@ public class WebSecurityConfig {
                             .requestMatchers(HttpMethod.DELETE,
                                     String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
 
+                            .requestMatchers(HttpMethod.GET,
+                                    String.format("%s/vn_pay/**", apiPrefix)).permitAll()
+
                             .anyRequest().authenticated();
                 }).csrf(AbstractHttpConfigurer::disable);
 

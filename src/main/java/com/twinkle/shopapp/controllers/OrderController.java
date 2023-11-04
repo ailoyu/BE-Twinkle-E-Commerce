@@ -5,6 +5,7 @@ import com.twinkle.shopapp.component.LocalizationUtils;
 import com.twinkle.shopapp.dtos.OrderDTO;
 import com.twinkle.shopapp.models.Order;
 import com.twinkle.shopapp.responses.CategoryResponse;
+import com.twinkle.shopapp.responses.OrderResponse;
 import com.twinkle.shopapp.services.IOrderService;
 import com.twinkle.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
@@ -39,8 +40,11 @@ public class OrderController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-            Order order = orderService.createOrder(orderDTO);
-            return ResponseEntity.ok().body(order);
+            String paymenURL = orderService.createOrder(orderDTO);
+            System.out.println(paymenURL);
+            return ResponseEntity.ok().body(OrderResponse.builder()
+                    .paymentMethod(paymenURL)
+                    .build());
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

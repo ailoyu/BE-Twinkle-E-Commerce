@@ -2,19 +2,25 @@ package com.twinkle.shopapp.controllers;
 
 import com.github.javafaker.Faker;
 import com.twinkle.shopapp.component.LocalizationUtils;
+import com.twinkle.shopapp.configuration.VNPayConfig;
 import com.twinkle.shopapp.dtos.CategoryDTO;
 import com.twinkle.shopapp.dtos.OrderDTO;
 import com.twinkle.shopapp.dtos.ProductDTO;
 import com.twinkle.shopapp.dtos.ProductImageDTO;
+import com.twinkle.shopapp.exceptions.DataNotFoundException;
 import com.twinkle.shopapp.models.Order;
 import com.twinkle.shopapp.models.Product;
 import com.twinkle.shopapp.models.ProductImage;
+import com.twinkle.shopapp.repositories.OrderRepository;
+import com.twinkle.shopapp.repositories.UserRepository;
 import com.twinkle.shopapp.responses.CategoryResponse;
 import com.twinkle.shopapp.responses.ProductListResponse;
 import com.twinkle.shopapp.responses.ProductResponse;
 import com.twinkle.shopapp.services.IProductService;
+import com.twinkle.shopapp.utils.EmailUtils;
 import com.twinkle.shopapp.utils.ImageUtils;
 import com.twinkle.shopapp.utils.MessageKeys;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -35,10 +41,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -294,5 +304,38 @@ public class ProductController {
     ){
         return ResponseEntity.ok(productService.getProductsByCategory(category_id));
     }
+
+    private final OrderRepository orderRepository;
+
+//    private RegisterServicesRepository registerServicesRepository;
+
+    @GetMapping("/payment-callback")
+    public void paymentCallback(@RequestParam Map<String, String> queryParams, HttpServletResponse response) throws DataNotFoundException, IOException {
+        String vnp_ResponseCode = queryParams.get("vnp_ResponseCode");
+        String orderId = queryParams.get("userId");
+        Long newOrderId = Long.valueOf(orderId);
+
+//        String registerServiceId = queryParams.get("registerServiceId");
+        if(orderId!= null && !orderId.equals("")) {
+            if ("00".equals(vnp_ResponseCode)) {
+                // Giao dịch thành công
+                /// Gửi email sau khi order
+                Order order = orderRepository.findById(newOrderId)
+                        .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy order này!"));
+                String emailContent = EmailUtils.getEmailContent(order, order.getOrderDetails());
+
+                String[] recipients = {order.getEmail(), "quangtrinhhuynh02@gmail.com"};
+
+                EmailUtils.sendEmail(recipients, "Twinkle | Đơn hàng của bạn đã được đặt thành công và đang xử lý!", emailContent);
+                response.sendRedirect("http://localhost:4200/order-detail");
+            } else {
+                // Giao dịch thất bại
+                // Thực hiện các xử lý cần thiết, ví dụ: không cập nhật CSDL\
+                response.sendRedirect("http://localhost:4200/order-detail");
+            }
+        }
+    }
+
+
 
 }

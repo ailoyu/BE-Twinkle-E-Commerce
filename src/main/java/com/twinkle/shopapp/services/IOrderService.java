@@ -7,7 +7,7 @@ import com.twinkle.shopapp.models.Order;
 import java.util.List;
 
 public interface IOrderService {
-    Order createOrder(OrderDTO orderDTO) throws Exception;
+    String createOrder(OrderDTO orderDTO) throws Exception;
     Order getOrder(Long id) throws DataNotFoundException;
     Order updateOrder(Long id, String status) throws DataNotFoundException;
     void deleteOrder(Long[] ids) throws DataNotFoundException;
