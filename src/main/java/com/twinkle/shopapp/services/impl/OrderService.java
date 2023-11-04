@@ -114,7 +114,7 @@ public class OrderService implements IOrderService {
 
 
         Float totalMoney = order.getTotalMoney();
-        String paymenURL = getPay(totalMoney.longValue(), savedOrder.getId().intValue());
+        String paymenURL = getPay(totalMoney.longValue() * 1000, savedOrder.getId().intValue());
         
         return paymenURL;
     }
