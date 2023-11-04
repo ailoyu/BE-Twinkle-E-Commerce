@@ -30,4 +30,7 @@ public interface IProductService {
     List<ProductResponse> getAllBestSellers();
 
     List<ProductResponse> getProductsByCategory(Long categoryId);
+
+    List<ProductResponse> getProductsByBrands(String brands);
+
 }

@@ -81,6 +81,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "Select * from products p where p.id in :productIds AND p.is_active = 1", nativeQuery = true) // gửi ds productIds lấy ra ds sản phẩm
     List<Product> findActiveProductsByIdIn(@Param("productIds") List<Long> productIds);
 
+    @Query(value = "SELECT p.name, p.id, p.thumbnail, p.description, p.is_active, p.updated_at, p.created_at, p.category_id " +
+            "FROM detail_input_order d " +
+            "INNER JOIN products p ON d.product_id = p.id " +
+            "INNER JOIN input_order i ON d.input_order_id = i.id " +
+            "INNER JOIN provider pr ON i.provider_id = pr.id " +
+            "WHERE pr.name LIKE %?1% AND p.is_active = 1 " +
+            "GROUP BY p.id ", nativeQuery = true)
+    List<Product> findProductsByBrand(@Param("brand") String brand);
+
     @Query(value = "SELECT DISTINCT p.* " +
             "FROM (SELECT p.* FROM order_details od " +
             "INNER JOIN orders o ON od.order_id = o.id " +

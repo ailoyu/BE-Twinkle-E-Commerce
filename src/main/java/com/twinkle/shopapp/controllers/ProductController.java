@@ -192,22 +192,18 @@ public class ProductController {
     ) {
         // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
         // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
-        PageRequest pageRequest = PageRequest.of(
-                page - 1, limits
-//                Sort.by("createdAt").descending());
-                // sắp xếp theo id tăng dần
-        );
+        PageRequest pageRequest = PageRequest.of(page - 1, limits);
 
+        // Lấy các products được filter
         Page<ProductResponse> productPage = productService
                 .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, pageRequest);
         List<ProductResponse> products = productPage.getContent();
 
-        // Execute the custom count query to get the total count of distinct records
+        // Lấy số trang của product được filter
         Long totalDistinctCount = productRepository.countDistinctProducts(categoryId, keyword, size, selectedPriceRate);
-
-        // Calculate the totalPages based on the total count and page size
         int pageSize = pageRequest.getPageSize();
         int totalPages = (int) Math.ceil((double) totalDistinctCount / pageSize);
+
 
         return ResponseEntity.ok(new ProductListResponse().builder()
                     .products(products)
@@ -306,6 +302,13 @@ public class ProductController {
             @PathVariable(name = "category_id") Long category_id
     ){
         return ResponseEntity.ok(productService.getProductsByCategory(category_id));
+    }
+
+    @GetMapping("/products-from-brand/{brand}")
+    public ResponseEntity<?> getProductByBrands(
+            @PathVariable(name = "brand") String brand
+    ){
+        return ResponseEntity.ok(productService.getProductsByBrands(brand));
     }
 
     private final OrderRepository orderRepository;

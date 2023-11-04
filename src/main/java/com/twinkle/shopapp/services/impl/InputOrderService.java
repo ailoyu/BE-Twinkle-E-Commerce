@@ -119,8 +119,9 @@ public class InputOrderService implements IInputOrderService {
     @Transactional // rollback dữ liệu khi bị sai gì đó
     public InputOrder updateInputOrder(Long id, InputOrderDTO inputOrderDTO) throws DataNotFoundException {
         InputOrder existingInputOrder = getInputOrder(id);
-        List<DetailInputOrder> inputOrders = detailInputOrderRepository.findByInputOrderId(existingInputOrder.getId());
-        detailInputOrderRepository.deleteAll(inputOrders);
+        List<DetailInputOrder> detailInputOrderList = detailInputOrderRepository.findByProductId(existingInputOrder.getId());
+        detailInputOrderRepository.deleteAll(detailInputOrderList);
+
 
         Provider provider = providerRepository.findById(inputOrderDTO.getProviderId())
                 .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy provider này"));

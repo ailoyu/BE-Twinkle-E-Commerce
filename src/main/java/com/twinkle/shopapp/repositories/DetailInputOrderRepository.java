@@ -9,4 +9,6 @@ public interface DetailInputOrderRepository extends JpaRepository<DetailInputOrd
     List<DetailInputOrder> findByInputOrderId(Long id);
 
 
+    List<DetailInputOrder> findByProductId
+            (Long id);
 }
