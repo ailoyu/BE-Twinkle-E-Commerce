@@ -12,6 +12,7 @@ import com.twinkle.shopapp.models.Order;
 import com.twinkle.shopapp.models.Product;
 import com.twinkle.shopapp.models.ProductImage;
 import com.twinkle.shopapp.repositories.OrderRepository;
+import com.twinkle.shopapp.repositories.ProductRepository;
 import com.twinkle.shopapp.repositories.UserRepository;
 import com.twinkle.shopapp.responses.CategoryResponse;
 import com.twinkle.shopapp.responses.ProductListResponse;
@@ -177,7 +178,7 @@ public class ProductController {
 //    }
 
 
-
+    private final ProductRepository productRepository;
 
     @GetMapping("")
     public ResponseEntity<ProductListResponse> getAllProducts(
@@ -199,12 +200,14 @@ public class ProductController {
 
         Page<ProductResponse> productPage = productService
                 .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, pageRequest);
-
-        // lấy tổng số trang
-        int totalPages = productPage.getTotalPages();
-
-        // danh sách các products ở tất cả các trang
         List<ProductResponse> products = productPage.getContent();
+
+        // Execute the custom count query to get the total count of distinct records
+        Long totalDistinctCount = productRepository.countDistinctProducts(categoryId, keyword, size, selectedPriceRate);
+
+        // Calculate the totalPages based on the total count and page size
+        int pageSize = pageRequest.getPageSize();
+        int totalPages = (int) Math.ceil((double) totalDistinctCount / pageSize);
 
         return ResponseEntity.ok(new ProductListResponse().builder()
                     .products(products)

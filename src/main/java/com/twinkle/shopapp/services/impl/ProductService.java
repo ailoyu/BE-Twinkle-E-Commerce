@@ -91,8 +91,6 @@ public class ProductService implements IProductService {
     public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size, String orderBy,
                                                 String selectedPriceRate,
                                                 PageRequest pageRequest) {
-        // Lấy danh sách sản phẩm theo page hiện tại và limit
-
 
         return productRepository.searchProducts(categoryId, keyword, size, orderBy, selectedPriceRate, pageRequest).map(product ->
                 // parse từ product -> ProductResponse: kết quả muốn trả ra client

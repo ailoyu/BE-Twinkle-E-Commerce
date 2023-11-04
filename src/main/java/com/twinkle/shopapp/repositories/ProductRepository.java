@@ -20,9 +20,31 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT * FROM products p where p.is_active = 1", nativeQuery = true)
     Page<Product> findAll(Pageable pageable);//phân trang
 
+    @Query(value = "SELECT COUNT(DISTINCT p.id) FROM products p " +
+            "INNER JOIN detail_input_order d ON p.id = d.product_id " +
+            "WHERE " +
+            "(:categoryId IS NULL OR :categoryId = 0 OR p.category_id = :categoryId) " +
+            "AND " +
+            "(:keyword IS NULL OR :keyword = '' OR p.name LIKE %:keyword%) " +
+            "AND " +
+            "(:size IS NULL OR :size = 0.0 OR d.size = :size) " +
+            "AND " +
+            "(:selectedPriceRate IS NULL OR :selectedPriceRate = '' OR" +
+            "(:selectedPriceRate = '< 50' AND d.price < 50) OR " +
+            "(:selectedPriceRate = '>= 50 and <= 100' AND d.price >= 50 AND d.price <= 100) OR " +
+            "(:selectedPriceRate = '> 100 and <= 200' AND d.price > 100 AND d.price <= 200) OR " +
+            "(:selectedPriceRate = '> 200' AND d.price > 200)) " +
+            "AND " +
+            "p.is_active = 1",
+            nativeQuery = true)
+    Long countDistinctProducts(@Param("categoryId") Long categoryId,
+                               @Param("keyword") String keyword,
+                               @Param("size") Float size,
+                               @Param("selectedPriceRate") String selectedPriceRate);
+
 
     // Đây là câu lệnh HQL
-    @Query(value = "SELECT DISTINCT p.id, p.name, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at FROM products p " +
+    @Query(value = "SELECT DISTINCT p.name, p.id, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at FROM products p " +
             "INNER JOIN detail_input_order d ON p.id = d.product_id " +
             "WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category_id = :categoryId) " +
@@ -39,16 +61,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND " +
             "p.is_active = 1 " +
             "ORDER BY CASE WHEN :orderBy = 'asc' THEN d.price END ASC, " +
-            "CASE WHEN :orderBy = 'desc' THEN d.price END DESC;", nativeQuery = true)
+            "CASE WHEN :orderBy = 'desc' THEN d.price END DESC;",
+            nativeQuery = true)
     Page<Product> searchProducts(@Param("categoryId") Long categoryId,
                                  @Param("keyword") String keyword,
                                  @Param("size") Float size,
                                  @Param("orderBy") String orderBy,
                                  @Param("selectedPriceRate") String selectedPriceRate,
                                  PageRequest pageRequest);
-
-//    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.productImages WHERE p.id = :productId")
-//    Optional<Product> getDetailProduct(@Param("productId") Long productId);
 
     @Query(value = "SELECT DISTINCT(d.size) FROM detail_input_order d " +
             "INNER JOIN products p on d.product_id = p.id " +
