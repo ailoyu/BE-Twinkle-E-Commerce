@@ -145,10 +145,7 @@ public class InputOrderService implements IInputOrderService {
 
         Product savedProduct = productRepository.save(product);
 
-        // xóa productPrice -> tạo lại productPrice
-        List<ProductPrice> productPrice = productPriceRepository.findByProductId(inputOrderDTO.getId());
-        productPriceRepository.deleteAll(productPrice);
-
+        // save new productPrice
         ProductPrice newProductPrice = ProductPrice.builder()
                 .product(savedProduct)
                 .price(inputOrderDTO.getPrice())
