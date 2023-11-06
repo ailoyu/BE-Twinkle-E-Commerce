@@ -187,6 +187,7 @@ public class ProductController {
             @RequestParam(defaultValue = "0", name = "size") Float size,
             @RequestParam(defaultValue = "", name = "order_by") String orderBy,
             @RequestParam(defaultValue = "", name = "selected_price_rate") String selectedPriceRate,
+            @RequestParam(defaultValue = "", name = "selected_provider") String selectedProvider,
             @RequestParam int page,
             @RequestParam("limit") int limits
     ) {
@@ -196,11 +197,11 @@ public class ProductController {
 
         // Lấy các products được filter
         Page<ProductResponse> productPage = productService
-                .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, pageRequest);
+                .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, selectedProvider, pageRequest);
         List<ProductResponse> products = productPage.getContent();
 
         // Lấy số trang của product được filter
-        Long totalDistinctCount = productRepository.countDistinctProducts(categoryId, keyword, size, selectedPriceRate);
+        Long totalDistinctCount = productRepository.countDistinctProducts(categoryId, keyword, size, selectedPriceRate, selectedProvider);
         int pageSize = pageRequest.getPageSize();
         int totalPages = (int) Math.ceil((double) totalDistinctCount / pageSize);
 

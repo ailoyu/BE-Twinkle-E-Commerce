@@ -22,6 +22,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT COUNT(DISTINCT p.id) FROM products p " +
             "INNER JOIN detail_input_order d ON p.id = d.product_id " +
+            "INNER JOIN input_order o on d.input_order_id = o.id " +
+            "INNER JOIN provider pr on o.provider_id = pr.id " +
             "WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category_id = :categoryId) " +
             "AND " +
@@ -34,18 +36,23 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(:selectedPriceRate = '>= 50 and <= 100' AND d.price >= 50 AND d.price <= 100) OR " +
             "(:selectedPriceRate = '> 100 and <= 200' AND d.price > 100 AND d.price <= 200) OR " +
             "(:selectedPriceRate = '> 200' AND d.price > 200)) " +
+            "AND " +
+            "(:selectedProvider IS NULL OR :selectedProvider = '' OR pr.name LIKE %:selectedProvider%) " +
             "AND " +
             "p.is_active = 1",
             nativeQuery = true)
     Long countDistinctProducts(@Param("categoryId") Long categoryId,
                                @Param("keyword") String keyword,
                                @Param("size") Float size,
-                               @Param("selectedPriceRate") String selectedPriceRate);
+                               @Param("selectedPriceRate") String selectedPriceRate,
+                               @Param("selectedProvider") String selectedProvider);
 
 
     // Đây là câu lệnh HQL
     @Query(value = "SELECT DISTINCT p.name, p.id, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at FROM products p " +
             "INNER JOIN detail_input_order d ON p.id = d.product_id " +
+            "INNER JOIN input_order o on d.input_order_id = o.id " +
+            "INNER JOIN provider pr on o.provider_id = pr.id " +
             "WHERE " +
             "(:categoryId IS NULL OR :categoryId = 0 OR p.category_id = :categoryId) " +
             "AND " +
@@ -58,6 +65,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(:selectedPriceRate = '>= 50 and <= 100' AND d.price >= 50 AND d.price <= 100) OR " +
             "(:selectedPriceRate = '> 100 and <= 200' AND d.price > 100 AND d.price <= 200) OR " +
             "(:selectedPriceRate = '> 200' AND d.price > 200)) " +
+            "AND " +
+            "(:selectedProvider IS NULL OR :selectedProvider = '' OR pr.name LIKE %:selectedProvider%) " +
             "AND " +
             "p.is_active = 1 " +
             "ORDER BY CASE WHEN :orderBy = 'asc' THEN d.price END ASC, " +
@@ -68,6 +77,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                  @Param("size") Float size,
                                  @Param("orderBy") String orderBy,
                                  @Param("selectedPriceRate") String selectedPriceRate,
+                                 @Param("selectedProvider") String selectedProvider,
                                  PageRequest pageRequest);
 
     @Query(value = "SELECT DISTINCT(d.size) FROM detail_input_order d " +
