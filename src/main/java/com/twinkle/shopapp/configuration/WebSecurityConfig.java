@@ -151,7 +151,7 @@ public class WebSecurityConfig {
                                     String.format("%s/detail_input_orders/**", apiPrefix)).hasRole(Role.ADMIN)
 
                             .requestMatchers(HttpMethod.GET,
-                                    String.format("%s/vn_pay/**", apiPrefix)).permitAll()
+                                    String.format("%s/data-analytics/**",apiPrefix)).hasRole(Role.ADMIN)
 
                             .anyRequest().authenticated();
                 }).csrf(AbstractHttpConfigurer::disable);
