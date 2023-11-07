@@ -114,9 +114,19 @@ public class OrderService implements IOrderService {
 
 
         Float totalMoney = order.getTotalMoney();
-        String paymenURL = getPay(totalMoney.longValue() * 1000, savedOrder.getId().intValue());
-        
-        return paymenURL;
+
+
+        if(orderDTO.getPaymentMethod().equals("Chuyển Khoản")){
+            String paymenURL = getPay(totalMoney.longValue() * 1000, savedOrder.getId().intValue());
+            return paymenURL;
+        } else {
+            String emailContent = EmailUtils.getEmailContent(order, order.getOrderDetails());
+
+            String[] recipients = {order.getEmail(), "quangtrinhhuynh02@gmail.com"};
+
+            EmailUtils.sendEmail(recipients, "Twinkle | Đơn hàng của bạn đã được đặt thành công và đang xử lý!", emailContent);
+            return "https://twinklee.netlify.app/order-detail";
+        }
     }
 
     public String getPay(long price, Integer userId) throws UnsupportedEncodingException {

@@ -70,9 +70,13 @@ public class InputOrderService implements IInputOrderService {
         Product savedProduct = productRepository.save(newProduct);
 
         // Set the product price
+//        Float taxFee = 0.1f * inputOrderDTO.getPrice();
+//        Float deliveryShipFee = 5f;
+        Float profitFee = 0.2f * inputOrderDTO.getPrice();
+        Float totalFee = inputOrderDTO.getPrice() + profitFee;
         ProductPrice productPrice = ProductPrice.builder()
                 .product(savedProduct)
-                .price(inputOrderDTO.getPrice())
+                .price(totalFee)
                 .appliedDate(new Date())
                 .build();
 
@@ -146,9 +150,13 @@ public class InputOrderService implements IInputOrderService {
         Product savedProduct = productRepository.save(product);
 
         // save new productPrice
+//        Float taxFee = 0.1f * inputOrderDTO.getPrice();
+//        Float deliveryShipFee = 5f;
+        Float profitFee = 0.2f * inputOrderDTO.getPrice();
+        Float totalFee = inputOrderDTO.getPrice() + profitFee;
         ProductPrice newProductPrice = ProductPrice.builder()
                 .product(savedProduct)
-                .price(inputOrderDTO.getPrice())
+                .price(totalFee)
                 .appliedDate(new Date())
                 .build();
 
