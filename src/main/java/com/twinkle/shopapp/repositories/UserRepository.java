@@ -22,9 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND " +
             "(:keyword IS NULL OR :keyword = '' OR u.fullname LIKE %:keyword%) " +
             "AND " +
-            "(:phoneNumber IS NULL OR :phoneNumber = '' OR u.phone_number LIKE %:phoneNumber%) " +
-            "AND " +
-            "is_active = 1", nativeQuery = true)
+            "(:phoneNumber IS NULL OR :phoneNumber = '' OR u.phone_number LIKE %:phoneNumber%)", nativeQuery = true)
     Page<User> searchUsers(@Param("roleId") Long roleId, @Param("keyword") String keyword, @Param("phoneNumber") String phoneNumber, Pageable pageable);
 
 

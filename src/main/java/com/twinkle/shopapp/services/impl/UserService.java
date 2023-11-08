@@ -237,10 +237,16 @@ public class UserService implements IUserService {
         for(long id : ids){
             Optional<User> optionalUser = userRepository.findById(id);
             if(optionalUser.isPresent()){
-                optionalUser.get().setActive(false);
+                if(optionalUser.get().isActive()){
+                    optionalUser.get().setActive(false);
+                } else {
+                    optionalUser.get().setActive(true);
+                }
             }
         }
     }
+
+
 
 
 
