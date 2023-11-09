@@ -298,6 +298,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllBestSellers());
     }
 
+    @GetMapping("/new-products")
+    public ResponseEntity<?> getNewProducts(){
+        return ResponseEntity.ok(productService.getNewProducts());
+    }
+
     @GetMapping("/products-from-category/{category_id}")
     public ResponseEntity<?> getProductByCategory(
             @PathVariable(name = "category_id") Long category_id

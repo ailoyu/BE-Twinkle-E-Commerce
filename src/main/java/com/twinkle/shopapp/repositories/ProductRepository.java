@@ -100,13 +100,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "GROUP BY p.id ", nativeQuery = true)
     List<Product> findProductsByBrand(@Param("brand") String brand);
 
+
+    @Query(value = "SELECT p.* " +
+            "FROM products p ORDER by p.created_at DESC LIMIT 9;", nativeQuery = true)
+    List<Product> getNewProducts();
+
     @Query(value = "SELECT DISTINCT p.* " +
             "FROM (SELECT p.* FROM order_details od " +
             "INNER JOIN orders o ON od.order_id = o.id " +
             "INNER JOIN products p ON od.product_id = p.id " +
             "WHERE o.status = 'Đã giao hàng' AND p.is_active = 1 " +
             "ORDER BY od.number_of_products DESC " +
-            "LIMIT 9) p", nativeQuery = true)
+            ") p LIMIT 4", nativeQuery = true)
     List<Product> getAllBestSellers();
 
     @Query(value = "SELECT p.* FROM products p " +

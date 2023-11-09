@@ -242,5 +242,13 @@ public class ProductService implements IProductService {
         return productByCategory;
     }
 
+    @Override
+    public List<ProductResponse> getNewProducts() {
+        List<ProductResponse> productByCategory = new ArrayList<>();
+        for (Product product : productRepository.getNewProducts()) {
+            productByCategory.add(ProductResponse.fromProduct(product));
+        }
+        return productByCategory;
+    }
 
 }

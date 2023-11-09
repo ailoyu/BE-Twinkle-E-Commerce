@@ -33,4 +33,6 @@ public interface IProductService {
 
     List<ProductResponse> getProductsByBrands(String brands);
 
+    List<ProductResponse> getNewProducts();
+
 }
