@@ -120,7 +120,7 @@ public class OrderService implements IOrderService {
             String paymenURL = getPay(totalMoney.longValue() * 1000, savedOrder.getId().intValue());
             return paymenURL;
         } else {
-            String emailContent = EmailUtils.getEmailContent(order, order.getOrderDetails());
+            String emailContent = EmailUtils.getEmailContent(savedOrder, order.getOrderDetails());
 
             String[] recipients = {order.getEmail(), "quangtrinhhuynh02@gmail.com"};
 
