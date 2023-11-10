@@ -120,7 +120,9 @@ public class OrderService implements IOrderService {
             String paymenURL = getPay(totalMoney.longValue() * 1000, savedOrder.getId().intValue());
             return paymenURL;
         } else {
-            String emailContent = EmailUtils.getEmailContent(savedOrder, order.getOrderDetails());
+            Order order1 = orderRepository.findById(savedOrder.getId())
+                    .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy order này!"));
+            String emailContent = EmailUtils.getEmailContent(order1, order1.getOrderDetails());
 
             String[] recipients = {order.getEmail(), "quangtrinhhuynh02@gmail.com"};
 
