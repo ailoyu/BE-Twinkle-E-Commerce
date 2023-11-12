@@ -5,10 +5,7 @@ import com.twinkle.shopapp.dtos.CartItemDTO;
 import com.twinkle.shopapp.dtos.OrderDTO;
 import com.twinkle.shopapp.exceptions.DataNotFoundException;
 import com.twinkle.shopapp.models.*;
-import com.twinkle.shopapp.repositories.OrderDetailRepository;
-import com.twinkle.shopapp.repositories.OrderRepository;
-import com.twinkle.shopapp.repositories.ProductRepository;
-import com.twinkle.shopapp.repositories.UserRepository;
+import com.twinkle.shopapp.repositories.*;
 import com.twinkle.shopapp.responses.OrderResponse;
 import com.twinkle.shopapp.services.IOrderService;
 import com.twinkle.shopapp.utils.EmailUtils;
@@ -38,12 +35,17 @@ public class OrderService implements IOrderService {
 
     private final OrderDetailRepository orderDetailRepository;
 
+    private final DetailInputOrderRepository detailInputOrderRepository;
+
+
     @Override
     @Transactional // rollback dữ liệu khi bị sai gì đó
     public String createOrder(OrderDTO orderDTO) throws Exception {
         // tìm xem user's id đã tồn tại chưa
         User user = userRepository.findById(orderDTO.getUserId())
                 .orElseThrow(() -> new DataNotFoundException("Ko tìm thấy User với id " + orderDTO.getUserId()));
+
+
 
         Order order = new Order();
         // Dùng Model Mapper
@@ -74,6 +76,23 @@ public class OrderService implements IOrderService {
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         for(CartItemDTO cartItemDTO : orderDTO.getCartItems()){
+
+            List<DetailInputOrder> detailInputOrders = detailInputOrderRepository.findByProductId(cartItemDTO.getProductId());
+            if(!detailInputOrders.isEmpty()){
+                for(DetailInputOrder detailInputOrder : detailInputOrders){
+                    float tolerance = 0.0001f;
+                    if(Math.abs(detailInputOrder.getSize() - cartItemDTO.getSize()) < tolerance
+                            && detailInputOrder.getQuantity() > 0){
+                        detailInputOrder.setQuantity(detailInputOrder.getQuantity() - cartItemDTO.getQuantity());
+                        detailInputOrderRepository.save(detailInputOrder);
+                        break;
+                    } else if(detailInputOrder.getQuantity() == 0) {
+                        throw new Exception("Size này đã không còn hoặc hết hàng!");
+                    }
+                }
+            } else {
+                throw new Exception("Không tìm thấy sản phầm này!");
+            }
 
             // Bỏ order vào từng order detail
             OrderDetail orderDetail = new OrderDetail();
