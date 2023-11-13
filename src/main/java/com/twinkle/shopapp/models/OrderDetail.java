@@ -35,4 +35,7 @@ public class OrderDetail {
     @Column(name = "total_money")
     private Float totalMoney;
 
+    @Column(name = "size")
+    private Float size;
+
 }

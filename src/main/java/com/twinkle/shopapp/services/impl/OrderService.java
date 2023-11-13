@@ -75,28 +75,34 @@ public class OrderService implements IOrderService {
         order.setTotalMoney(orderDTO.getTotalMoney());
 
         List<OrderDetail> orderDetails = new ArrayList<>();
-        for(CartItemDTO cartItemDTO : orderDTO.getCartItems()){
+        for(CartItemDTO cartItemDTO : orderDTO.getCartItems())
+        {
 
             List<DetailInputOrder> detailInputOrders = detailInputOrderRepository.findByProductId(cartItemDTO.getProductId());
             if(!detailInputOrders.isEmpty()){
-                for(DetailInputOrder detailInputOrder : detailInputOrders){
+                for(DetailInputOrder detailInputOrder : detailInputOrders)
+                {
                     float tolerance = 0.0001f;
                     if(Math.abs(detailInputOrder.getSize() - cartItemDTO.getSize()) < tolerance
-                            && detailInputOrder.getQuantity() > 0){
+                            && detailInputOrder.getQuantity() - cartItemDTO.getQuantity() >= 0)
+                    {
                         detailInputOrder.setQuantity(detailInputOrder.getQuantity() - cartItemDTO.getQuantity());
                         detailInputOrderRepository.save(detailInputOrder);
                         break;
-                    } else if(detailInputOrder.getQuantity() == 0) {
-                        throw new Exception("Size này đã không còn hoặc hết hàng!");
+                    } else if(detailInputOrder.getQuantity() == 0 || detailInputOrder.getQuantity() - cartItemDTO.getQuantity() < 0)
+                    {
+                        throw new Exception("Size này đã không còn hàng hoặc không đủ số lượng!");
                     }
                 }
-            } else {
+            } else
+            {
                 throw new Exception("Không tìm thấy sản phầm này!");
             }
 
             // Bỏ order vào từng order detail
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
+            orderDetail.setSize(cartItemDTO.getSize());
 
             // lấy ra từng sản phẩm và số lượng vào trong giỏ hàng
             Long productId = cartItemDTO.getProductId();
@@ -109,6 +115,7 @@ public class OrderService implements IOrderService {
             // set sản phẩm và số lượng vào trong giỏ hàng
             orderDetail.setProduct(product);
             orderDetail.setNumberOfProducts(quantity);
+
 
 
             // set giá cho từng sản phẩm
