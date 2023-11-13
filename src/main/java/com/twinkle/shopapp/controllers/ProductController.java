@@ -25,6 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -63,6 +65,8 @@ public class ProductController {
     private final LocalizationUtils localizationUtils;
 
     private final ModelMapper modelMapper;
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
 
     @PostMapping("")
@@ -193,6 +197,9 @@ public class ProductController {
     ) {
         // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
         // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
+        logger.info("keyword = " + keyword + ", category_id = " + categoryId +
+                ", size = " + size + ", order_by = " + orderBy + ", selected_price_rate = " + selectedPriceRate
+        + ", selected_provider = " + selectedProvider);
         PageRequest pageRequest = PageRequest.of(page - 1, limits);
 
         // Lấy các products được filter
