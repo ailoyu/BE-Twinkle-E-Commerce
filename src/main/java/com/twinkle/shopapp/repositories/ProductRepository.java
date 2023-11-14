@@ -49,7 +49,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     // Đây là câu lệnh HQL
-    @Query(value = "SELECT DISTINCT p.name, p.id, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at FROM products p " +
+    @Query(value = "SELECT DISTINCT p.id, p.name, p.description, p.thumbnail, p.is_active, p.category_id, p.created_at, p.updated_at, d.price FROM products p " +
             "INNER JOIN detail_input_order d ON p.id = d.product_id " +
             "INNER JOIN input_order o on d.input_order_id = o.id " +
             "INNER JOIN provider pr on o.provider_id = pr.id " +
