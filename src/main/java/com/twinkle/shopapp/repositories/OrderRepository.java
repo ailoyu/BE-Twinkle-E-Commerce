@@ -26,7 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "    SELECT COUNT(id) AS total_count " +
             "    FROM orders " +
             ") t " +
-            "GROUP BY o.status;", nativeQuery = true)
+            "GROUP BY o.status, t.total_count;", nativeQuery = true)
     List<Object[]> getOrderStatusStatistics();
 
     
