@@ -17,7 +17,7 @@ import java.util.List;
 public interface IProductService {
     Product createProduct(ProductDTO productDTO) throws Exception;
     Product getProductById(long id) throws Exception;
-    Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size, String orderBy, String selectedPriceRate, String selectedProvider, PageRequest pageRequest);
+    Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size, String selectedPriceRate, String selectedProvider, PageRequest pageRequest);
     Product updateProduct(long id, ProductDTO productDTO) throws Exception;
     void deleteProduct(Long[] id);
     boolean existsByName(String name);

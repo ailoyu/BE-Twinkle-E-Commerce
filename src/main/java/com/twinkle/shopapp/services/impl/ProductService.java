@@ -88,12 +88,12 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size, String orderBy,
+    public Page<ProductResponse> getAllProducts(String keyword, Long categoryId, Float size,
                                                 String selectedPriceRate,
                                                 String selectedProvider,
                                                 PageRequest pageRequest) {
 
-        return productRepository.searchProducts(categoryId, keyword, size, orderBy, selectedPriceRate, selectedProvider, pageRequest).map(product ->
+        return productRepository.searchProducts(categoryId, keyword, size, selectedPriceRate, selectedProvider, pageRequest).map(product ->
                 // parse từ product -> ProductResponse: kết quả muốn trả ra client
                 ProductResponse.fromProduct(product));
      }

@@ -66,9 +66,6 @@ public class ProductController {
 
     private final ModelMapper modelMapper;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
-
-
     @PostMapping("")
     public ResponseEntity<?> insertProduct(
             @Valid @RequestBody ProductDTO productDTO,
@@ -197,14 +194,14 @@ public class ProductController {
     ) {
         // Lưu ý: page bắt đầu từ 0 (phải lấy page - 1)
         // page: là trang đang đứng htai, limits: tổng số item trong 1 trang
-        logger.info("keyword = " + keyword + ", category_id = " + categoryId +
-                ", size = " + size + ", order_by = " + orderBy + ", selected_price_rate = " + selectedPriceRate
-        + ", selected_provider = " + selectedProvider);
-        PageRequest pageRequest = PageRequest.of(page - 1, limits);
+        PageRequest pageRequest = PageRequest.of(page - 1, limits, Sort.by(Sort.Direction.ASC, "d.price"));
+        if(orderBy.equals("desc")){
+            pageRequest = PageRequest.of(page - 1, limits, Sort.by(Sort.Direction.DESC, "d.price"));
+        }
 
         // Lấy các products được filter
         Page<ProductResponse> productPage = productService
-                .getAllProducts(keyword, categoryId, size, orderBy, selectedPriceRate, selectedProvider, pageRequest);
+                .getAllProducts(keyword, categoryId, size, selectedPriceRate, selectedProvider, pageRequest);
         List<ProductResponse> products = productPage.getContent();
 
         // Lấy số trang của product được filter

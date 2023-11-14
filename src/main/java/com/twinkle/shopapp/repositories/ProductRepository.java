@@ -68,14 +68,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND " +
             "(:selectedProvider IS NULL OR :selectedProvider = '' OR pr.name LIKE %:selectedProvider%) " +
             "AND " +
-            "p.is_active = 1 " +
-            "ORDER BY CASE WHEN :orderBy = 'asc' THEN d.price END ASC, " +
-            "CASE WHEN :orderBy = 'desc' THEN d.price END DESC;",
+            "p.is_active = 1 ",
             nativeQuery = true)
     Page<Product> searchProducts(@Param("categoryId") Long categoryId,
                                  @Param("keyword") String keyword,
                                  @Param("size") Float size,
-                                 @Param("orderBy") String orderBy,
                                  @Param("selectedPriceRate") String selectedPriceRate,
                                  @Param("selectedProvider") String selectedProvider,
                                  PageRequest pageRequest);
